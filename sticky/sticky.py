@@ -30,6 +30,7 @@ class Sticky(commands.Cog):
             header_enabled=True,
             advstickied={"content": None, "embed": {}},  # This is for [p]stickyexisting
             last=None,
+            repost_cooldown=self.REPOST_COOLDOWN,
         )
         self.locked_channels = set()
         self._channel_cvs: Dict[discord.TextChannel, asyncio.Condition] = {}
