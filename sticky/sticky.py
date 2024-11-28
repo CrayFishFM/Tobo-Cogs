@@ -111,6 +111,17 @@ class Sticky(commands.Cog):
 
     @checks.mod_or_permissions(manage_messages=True)
     @commands.guild_only()
+    @sticky.command(name="repostcooldown")
+    async def sticky_repostcooldown(self, ctx: commands.Context, repost_cooldown: int):
+        """Set the cooldown for reposting stickied messages in this channel.
+
+        The cooldown is 3 seconds by default.
+        """
+        await self.conf.channel(ctx.channel).REPOST_COOLDOWN.set(repost_cooldown)
+        await ctx.tick()
+
+    @checks.mod_or_permissions(manage_messages=True)
+    @commands.guild_only()
     @commands.command()
     async def unsticky(self, ctx: commands.Context, force: bool = False):
         """Remove the sticky message from this channel.
@@ -201,7 +212,8 @@ class Sticky(commands.Cog):
                 utcnow = datetime.now(timezone.utc)
 
             time_since = utcnow - last_message.created_at
-            time_to_wait = self.REPOST_COOLDOWN - time_since.total_seconds()
+            repost_cooldown = await settings.REPOST_COOLDOWN() or self.REPOST_COOLDOWN
+            time_to_wait = repost_cooldown - time_since.total_seconds()
             if time_to_wait > 0:
                 await asyncio.sleep(time_to_wait)
 
