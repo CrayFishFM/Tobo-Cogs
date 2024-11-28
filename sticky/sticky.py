@@ -18,8 +18,6 @@ log = logging.getLogger("red.sticky")
 class Sticky(commands.Cog):
     """Sticky messages to your channels."""
 
-    REPOST_COOLDOWN = 3
-
     def __init__(self, bot):
         super().__init__()
 
@@ -30,7 +28,7 @@ class Sticky(commands.Cog):
             header_enabled=True,
             advstickied={"content": None, "embed": {}},  # This is for [p]stickyexisting
             last=None,
-            repost_cooldown=self.REPOST_COOLDOWN,
+            REPOST_COOLDOWN=3,
         )
         self.locked_channels = set()
         self._channel_cvs: Dict[discord.TextChannel, asyncio.Condition] = {}
@@ -113,12 +111,12 @@ class Sticky(commands.Cog):
     @checks.mod_or_permissions(manage_messages=True)
     @commands.guild_only()
     @sticky.command(name="repostcooldown")
-    async def sticky_repostcooldown(self, ctx: commands.Context, repost_cooldown: int):
+    async def sticky_repostcooldown(self, ctx: commands.Context, cooldown: int):
         """Set the cooldown for reposting stickied messages in this channel.
 
         The cooldown is 3 seconds by default.
         """
-        await self.conf.channel(ctx.channel).REPOST_COOLDOWN.set(repost_cooldown)
+        await self.conf.channel(ctx.channel).REPOST_COOLDOWN.set(cooldown)
         await ctx.tick()
 
     @checks.mod_or_permissions(manage_messages=True)
@@ -213,7 +211,7 @@ class Sticky(commands.Cog):
                 utcnow = datetime.now(timezone.utc)
 
             time_since = utcnow - last_message.created_at
-            repost_cooldown = await settings.REPOST_COOLDOWN() or self.REPOST_COOLDOWN
+            repost_cooldown = settings_dict["REPOST_COOLDOWN"]
             time_to_wait = repost_cooldown - time_since.total_seconds()
             if time_to_wait > 0:
                 await asyncio.sleep(time_to_wait)
